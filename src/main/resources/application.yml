@@ -1,0 +1,9 @@
+server:
+  port: 9090
+management:
+  endpoint:
+    health:
+      show-details: always
+info:
+  application: Hello World
+  version: V.1.0
