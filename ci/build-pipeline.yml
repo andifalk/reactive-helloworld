@@ -1,0 +1,45 @@
+resource_types:
+- name: artifactory-resource
+  type: docker-image
+  source:
+    repository: springio/artifactory-resource
+    tag: latest
+resources:
+- name: git-repo
+  type: git
+  source:
+    uri: https://github.com/andifalk/reactive-helloworld.git
+    branch: master
+- name: artifactory-repo
+  type: artifactory-resource
+  source:
+    uri: https://localhost:8080/afa
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    build_name: reactive-helloworld
+jobs:
+- name: build
+  plan:
+  - get: git-repo
+    trigger: true   
+  - task: build
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: openjdk
+          tag: 8-jdk-alpine
+      inputs:
+      - name: git-repo
+      outputs:
+      - name: distribution-repository
+      run:
+        path: git-repo/ci/scripts/build.sh
+  - put: artifactory-repo
+    params:
+      repo: libs-snapshot-local
+      folder: distribution-repository
+      build_number: "${BUILD_PIPELINE_NAME}-${BUILD_JOB_NAME}-${BUILD_NAME}"
+      build_uri: "https://192.168.50.6/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      disable_checksum_uploads: true

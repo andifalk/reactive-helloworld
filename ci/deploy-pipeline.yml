@@ -1,0 +1,20 @@
+resource_types:
+- name: artifactory-resource
+  type: docker-image
+  source:
+    repository: springio/artifactory-resource
+    tag: latest
+resources:
+- name: artifactory-repo
+  type: artifactory-resource
+  source:
+    uri: https://localhost:8080/afa
+    build_name: reactive-helloworld
+- name: cf
+  type: cf
+  source:
+    api: https://api.run.pivotal.io
+    username: ((cf-email))
+    password: ((cf-password))
+    organization: ((cf-org))
+    space: ((cf-space))    
